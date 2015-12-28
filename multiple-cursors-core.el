@@ -827,6 +827,20 @@ for running commands with multiple cursors.")
 
 (load mc/list-file t) ;; load, but no errors if it does not exist yet please
 
+(defvar mc--evil-key-read-results nil
+  "Stored results from the last call to `evil-key-read'. The
+  results are stored so that a key doesn't need to be read by
+  each fake cursor.")
+
+(defun mc/evil-read-key-advice (orig-fun &optional prompt)
+  (if mc--executing-command-for-fake-cursor
+      mc--evil-key-read-results
+    (let ((res (apply orig-fun prompt)))
+      (setq mc--evil-key-read-results res)
+      res)))
+
+(advice-add 'evil-read-key :around #'mc/evil-read-key-advice)
+
 (defvar mc--evil-motion-read-results nil
   "Stored results from the last call to `evil-motion-read'. The
   results are stored so that a motion doesn't need to be read by
